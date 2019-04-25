@@ -1,0 +1,98 @@
+
+P:/G08_Lab1_REALDEAL/sort.axf:     file format elf32-littlearm
+
+
+Disassembly of section .text:
+
+00000000 <__cs3_interrupt_vector>:
+// R2 address of where the signal begins in permanent memory
+// R3 sum of all the numbers of our signal
+// R4 value of one of the numbers in the signal
+// R5 hold the result of sum/(num_of_entries), ie the average
+// compute the sum of all numbers in the signal, and store result in a register
+			LDR R0, =N // load the address of where all the data for the program will be
+   0:	e59f008c 	ldr	r0, [pc, #140]	; 94 <ARRAY+0x20>
+			LDR R1, [R0] // load the number of entries in R1
+   4:	e5901000 	ldr	r1, [r0]
+			ADD R2, R0, #4 // put the address of where the signal begins in memory in R2
+   8:	e2802004 	add	r2, r0, #4
+			LDR R3, [R2] // load the first entrie/number of the list in R2
+   c:	e5923000 	ldr	r3, [r2]
+			MOV R10, #0 // our flag 
+  10:	e3a0a000 	mov	r10, #0
+
+00000014 <LOOPCMP>:
+			
+LOOPCMP:	SUBS R1, R1, #1 // decrement the number of entries in the array
+  14:	e2511001 	subs	r1, r1, #1
+			BEQ DONELOOP  //went over whole array now send to check 
+  18:	0a000005 	beq	34 <DONELOOP>
+			ADD R2, R2, #4	// increment the address by 4 so that R2 is now the address of the next element in the list
+  1c:	e2822004 	add	r2, r2, #4
+			LDR R6, [R2]
+  20:	e5926000 	ldr	r6, [r2]
+			CMP R3, R6 // comparing 2 adjacent elements
+  24:	e1530006 	cmp	r3, r6
+			BGE SWAP // if R3 is bigger than R2 + 4 then go back to loopmax to iterate over the other elements
+  28:	aa000007 	bge	4c <SWAP>
+			LDR R3, [R2] // overriding R3 because it is the register that stores the element in the array that you are comparing
+  2c:	e5923000 	ldr	r3, [r2]
+			B LOOPCMP // go back into loop (not done going through array still comparing adjacent elements)
+  30:	eafffff7 	b	14 <LOOPCMP>
+
+00000034 <DONELOOP>:
+
+DONELOOP:	ADD R2, R0, #4
+  34:	e2802004 	add	r2, r0, #4
+			LDR R3, [R2] // load the first entrie/number of the list in R2
+  38:	e5923000 	ldr	r3, [r2]
+			LDR R1, [R0] // load the number of entries in R1
+  3c:	e5901000 	ldr	r1, [r0]
+			CMP R10, #1 
+  40:	e35a0001 	cmp	r10, #1
+			BGE INTER // if flag is 1 we want to loop again 
+  44:	aa000006 	bge	64 <INTER>
+			B END // go to the end because it is already sorted
+  48:	ea000007 	b	6c <END>
+
+0000004c <SWAP>:
+
+SWAP:		STR R3, [R2] //Put contents of R3 in R2 address 
+  4c:	e5823000 	str	r3, [r2]
+			STR R6, [R2, #-4] //Go back a spot to put the adjacent value 
+  50:	e5026004 	str	r6, [r2, #-4]
+			CMP R3, R6 //R3 is less or equal than R6 so don't need to put up flag (we already checked if it was bigger so 
+  54:	e1530006 	cmp	r3, r6
+						//when we check if it is less then we have basically checked that it is equal)
+			BLE LOOPCMP //Numbers are equal dont need to increment flag 
+  58:	daffffed 	ble	14 <LOOPCMP>
+			ADD R10, R10, #1 //Increment the flag because a different number swap was made
+  5c:	e28aa001 	add	r10, r10, #1
+			B LOOPCMP
+  60:	eaffffeb 	b	14 <LOOPCMP>
+
+00000064 <INTER>:
+
+INTER:		MOV R10, #0 // reset the flag to zero
+  64:	e3a0a000 	mov	r10, #0
+			B LOOPCMP
+  68:	eaffffe9 	b	14 <LOOPCMP>
+
+0000006c <END>:
+
+END:		B END
+  6c:	eafffffe 	b	6c <END>
+
+00000070 <N>:
+  70:	00000008 	.word	0x00000008
+
+00000074 <ARRAY>:
+  74:	00000001 	.word	0x00000001
+  78:	00000006 	.word	0x00000006
+  7c:	00000002 	.word	0x00000002
+  80:	00000003 	.word	0x00000003
+  84:	0000000a 	.word	0x0000000a
+  88:	fffffffa 	.word	0xfffffffa
+  8c:	00000002 	.word	0x00000002
+  90:	00000003 	.word	0x00000003
+  94:	00000070 	.word	0x00000070

@@ -1,0 +1,101 @@
+
+P:/G08_Lab1_REALDEAL/stddev.axf:     file format elf32-littlearm
+
+
+Disassembly of section .text:
+
+00000000 <__cs3_interrupt_vector>:
+			.text
+			.global _start
+_start:
+			LDR R4, =RESULT  //Store memory address of result in R4
+   0:	e59f4088 	ldr	r4, [pc, #136]	; 90 <NUMBERS+0x1c>
+			LDR R2, [R4, #4] //[R4,#4] gives us the value that is stored in memory at the address stored in R4 but shifted by 4bytes(address of N), in this
+   4:	e5942004 	ldr	r2, [r4, #4]
+						     // in our case this corresponds to the value of N, which is the number of elements in the list
+			ADD R3, R4, #8   // R3 will hold the address of that was stored inside R4 but shifted by 8 bytes, or 2 words, this corresponds the start the address 
+   8:	e2843008 	add	r3, r4, #8
+						     // where the number list starts
+			LDR R0, [R3]     // load the value that is at the adress inside R3 (so the first number of the list) insisde R0
+   c:	e5930000 	ldr	r0, [r3]
+
+00000010 <LOOPMAX>:
+//find max
+LOOPMAX:	SUBS R2, R2, #1// decrease R2 by one
+  10:	e2522001 	subs	r2, r2, #1
+			BEQ DONEMAX    // if R2 = 0 then go to DONEMAX
+  14:	0a000005 	beq	30 <DONEMAX>
+			ADD R3, R3, #4 // increment R3 by 4, which results in the memory address stored in R3 to be shifted by 4bytes, or in other words by a word/memory slot
+  18:	e2833004 	add	r3, r3, #4
+						   // R3 is a pointer to every element of the array
+			LDR R1, [R3]   // we load in R1 the value that R3 now points at
+  1c:	e5931000 	ldr	r1, [r3]
+			CMP R0, R1     // compare R1 to R1 
+  20:	e1500001 	cmp	r0, r1
+			BGE LOOPMAX    // if R0 is bigger than R1 then go back to loopmax to iterate over the other elements
+  24:	aafffff9 	bge	10 <LOOPMAX>
+			MOV R0, R1     // if R1 is bigger than R0 then put R1 in R0
+  28:	e1a00001 	mov	r0, r1
+					       // R0 is a the current max value
+			B LOOPMAX      // go back to loopmax to continue iterating over the elements of the array
+  2c:	eafffff7 	b	10 <LOOPMAX>
+
+00000030 <DONEMAX>:
+
+DONEMAX:
+//find min
+			LDR R2, [R4, #4] // reset R2 to the number of elements in the array
+  30:	e5942004 	ldr	r2, [r4, #4]
+			ADD R3, R4, #8 // reset R3 to the starting adress of the array of numbers
+  34:	e2843008 	add	r3, r4, #8
+			LDR R5, [R3] // R5 is the first element of the array
+  38:	e5935000 	ldr	r5, [r3]
+
+0000003c <LOOPMIN>:
+
+LOOPMIN:	SUBS R2, R2, #1 // decrement
+  3c:	e2522001 	subs	r2, r2, #1
+			BEQ DONEMIN // if = 0 then exit loop
+  40:	0a000005 	beq	5c <DONEMIN>
+			ADD R3, R3, #4 // increment r3 to go to next element in the array
+  44:	e2833004 	add	r3, r3, #4
+			LDR R1, [R3] // load value at address [R3] in R1
+  48:	e5931000 	ldr	r1, [r3]
+			CMP R5, R1 // compare with current min, ie R5 is the current min
+  4c:	e1550001 	cmp	r5, r1
+			BLE LOOPMIN // R5 is smaller then R1 then go back to loopmin to iterate over elements 
+  50:	dafffff9 	ble	3c <LOOPMIN>
+			MOV R5, R1 // R1 is smaller than R5 so R1 becomes the new global min (R5)
+  54:	e1a05001 	mov	r5, r1
+			B LOOPMIN // go back to the loopmin to iterate over the rest of the numbers
+  58:	eafffff7 	b	3c <LOOPMIN>
+
+0000005c <DONEMIN>:
+
+DONEMIN:	
+			SUBS R6, R0, R5 // substract max(R0) to min (R5) and put result in R6
+  5c:	e0506005 	subs	r6, r0, r5
+			LSR R7, R6, #2 // divide R6 by 4, put result in R7
+  60:	e1a07126 	lsr	r7, r6, #2
+			STR R7, [R4] // store R7 (the standard deviation) in the address stored inside R4, ie store it in result
+  64:	e5847000 	str	r7, [r4]
+
+00000068 <END>:
+END:		B END
+  68:	eafffffe 	b	68 <END>
+
+0000006c <RESULT>:
+  6c:	00000000 	.word	0x00000000
+
+00000070 <N>:
+  70:	00000007 	.word	0x00000007
+
+00000074 <NUMBERS>:
+  74:	00000004 	.word	0x00000004
+  78:	fffffffb 	.word	0xfffffffb
+  7c:	00000003 	.word	0x00000003
+  80:	00000013 	.word	0x00000013
+  84:	00000001 	.word	0x00000001
+  88:	00000008 	.word	0x00000008
+  8c:	00000002 	.word	0x00000002
+  90:	0000006c 	.word	0x0000006c
